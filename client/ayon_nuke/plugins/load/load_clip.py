@@ -42,6 +42,7 @@ class LoadClip(plugin.NukeLoader):
         "render",
         "prerender",
         "review",
+        "element",
     }
     product_types = product_base_types
     representations = {"*"}
