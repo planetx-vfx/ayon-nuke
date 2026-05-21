@@ -424,8 +424,9 @@ class NukeWriteCreator(NukeCreator):
         instance_node = created_inst.transient_data["node"]
         formatting_data = copy.deepcopy(data)
         write_node = nuke.allNodes(group=instance_node, filter="Write")[0]
-        _, ext = os.path.splitext(write_node["file"].value())
-        formatting_data.update({"ext": ext[1:]})
+        file_type_knob = write_node.knob("file_type")
+        ext = file_type_knob.value().lstrip(".") if file_type_knob else ""
+        formatting_data.update({"ext": ext})
 
         # Retieve render template and staging directory.
         fpath_template = self.temp_rendering_path_template
@@ -494,7 +495,8 @@ class NukeWriteCreator(NukeCreator):
             pre_create_data,
             [
                 "active_frame",
-                "render_target"
+                "render_target",
+                "file_type",
             ]
         )
         # make sure selected nodes are added

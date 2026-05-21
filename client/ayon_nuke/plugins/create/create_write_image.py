@@ -2,6 +2,7 @@ import nuke
 
 from ayon_core.lib import (
     NumberDef,
+    EnumDef,
     UISeparatorDef,
 )
 from ayon_nuke import api as napi
@@ -34,6 +35,13 @@ class CreateWriteImage(napi.NukeWriteCreator):
                 "active_frame",
                 label="Active frame",
                 default=nuke.frame()
+            ),
+            EnumDef(
+                "file_type",
+                label="File Type",
+                tooltip="The type of file to write.",
+                items=["png", "jpeg", "tiff"],
+                default="png",
             ),
         ])
         return attr_defs
@@ -77,18 +85,20 @@ class CreateWriteImage(napi.NukeWriteCreator):
             }
         )
 
-        self._add_frame_range_limit(created_node, instance_data)
+        self._update_write_knobs(created_node, instance_data)
 
         self.integrate_links(node_selection, created_node, outputs=True)
 
         return created_node
 
-    def _add_frame_range_limit(self, write_node, instance_data):
+    def _update_write_knobs(self, write_node, instance_data):
         if "use_range_limit" not in self.instance_attributes:
             return
 
         active_frame = (
             instance_data["creator_attributes"].get("active_frame"))
+        file_type = (
+            instance_data["creator_attributes"].get("file_type"))
 
         write_node.begin()
         for n in nuke.allNodes():
@@ -100,5 +110,6 @@ class CreateWriteImage(napi.NukeWriteCreator):
         w_node["use_limit"].setValue(True)
         w_node["first"].setValue(active_frame or nuke.frame())
         w_node["last"].setExpression("first")
+        w_node["file_type"].setValue(file_type)
 
         return write_node
